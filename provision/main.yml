@@ -1,0 +1,54 @@
+# Builds the vulnerable-AD lab on dc01, from the controller: promote a new forest (cs.org, the
+# domain upstream's README uses), then run upstream's vulnad.ps1 unchanged with its documented
+# call, `Invoke-VulnAD -UsersLimit 100 -DomainName cs.org`.
+- name: vulnerable-AD domain controller
+  hosts: dc
+  gather_facts: false
+  vars:
+    domain: cs.org
+    netbios: CS
+    # The domain's built-in Administrator (and the DSRM password). Promotion needs one set.
+    admin_password: "Vu1nAD!Forest#2024"
+    users_limit: 100
+  tasks:
+    - name: Local Administrator password (becomes the domain Administrator's)
+      ansible.windows.win_user:
+        name: Administrator
+        password: "{{ admin_password }}"
+        password_never_expires: true
+
+    - name: AD DS role
+      ansible.windows.win_feature:
+        name: AD-Domain-Services
+        include_management_tools: true
+
+    - name: New forest {{ domain }}
+      microsoft.ad.domain:
+        dns_domain_name: "{{ domain }}"
+        domain_netbios_name: "{{ netbios }}"
+        safe_mode_password: "{{ admin_password }}"
+        reboot: true
+
+    - name: Wait for Active Directory Web Services
+      ansible.windows.win_shell: Get-ADDomain | Select-Object -ExpandProperty DNSRoot
+      register: addomain
+      until: addomain.rc == 0 and domain in addomain.stdout
+      retries: 30
+      delay: 20
+
+    - name: Upstream script
+      ansible.windows.win_copy:
+        src: ../vulnerable-AD/vulnad.ps1
+        dest: C:\vulnerable-AD\
+
+    # Upstream's last step calls Set-SmbClientConfiguration with an explicit -Confirm, which
+    # cannot prompt over WinRM; its error is caught here and the same setting is applied
+    # without the prompt.
+    - name: Invoke-VulnAD
+      ansible.windows.win_shell: |
+        . C:\vulnerable-AD\vulnad.ps1
+        try { Invoke-VulnAD -UsersLimit {{ users_limit }} -DomainName "{{ domain }}" } catch { Write-Host "Invoke-VulnAD: $_" }
+        Set-SmbClientConfiguration -RequireSecuritySignature $false -EnableSecuritySignature $false -Confirm:$false -Force
+        New-Item -ItemType File -Force C:\vulnerable-AD\done | Out-Null
+      args:
+        creates: C:\vulnerable-AD\done

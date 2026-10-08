@@ -1,0 +1,17 @@
+{
+  "title": "vulnerable-AD",
+  "description": "A single Windows Server 2019 domain controller for cs.org, filled with random users, groups and the misconfigurations behind the classic Active Directory attacks: ACL abuse, Kerberoasting, AS-REP roasting, DnsAdmins, DCSync rights, passwords in descriptions and shared passwords.",
+  "question": "Compromise the cs.org domain and reach Domain Admin.",
+  "category": "NETWORK",
+  "difficulty": 2,
+  "evidence_kind": "SECRET",
+  "capabilities": ["active-directory", "kerberoasting", "as-rep-roasting", "password-spraying", "acl-abuse", "dcsync"],
+  "providers": [
+    "virtualbox",
+    "vmware_desktop",
+    "parallels",
+    "vmware_esxi",
+    "aws",
+    "azure"
+  ]
+}
