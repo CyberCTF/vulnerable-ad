@@ -3,7 +3,9 @@
   "resolved_version": 1,
   "name": "vulnerable-ad",
   "instance": null,
-  "inputs": [],
+  "inputs": [
+    "CTF_FLAG_MAIN"
+  ],
   "networks": {
     "lab": {
       "cidr": "10.60.81.0/24",
@@ -71,7 +73,9 @@
         }
       ],
       "depends_on": [],
-      "inputs": [],
+      "inputs": [
+        "CTF_FLAG_MAIN"
+      ],
       "volumes": {},
       "resources": {
         "cpus": 2,
@@ -173,5 +177,5 @@
       }
     ]
   },
-  "message": "vulnerable-AD is up: dc01, the domain controller of cs.org, at 10.60.81.10.\nUsers, groups and ACLs are random on every build. Start from an anonymous view of the domain,\nthen spray, roast and follow the ACLs to Domain Admin.\n"
+  "message": "vulnerable-AD is up: dc01, the domain controller of cs.org, at 10.60.81.10.\nUsers, groups and ACLs are random on every build. Start from an anonymous view of the domain,\nthen spray, roast and follow the ACLs to Domain Admin.\nDomain Admin reads the flag in C:\\ctf\\flag.txt on dc01.\n"
 }

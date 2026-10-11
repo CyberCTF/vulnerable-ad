@@ -1,0 +1,89 @@
+{
+  "objectives": [
+    {
+      "key": "main",
+      "title": "Domain Admin",
+      "prompt": "Compromise the cs.org domain, reach Domain Admin and read C:\\ctf\\flag.txt on dc01.",
+      "check": {
+        "evidence": "SECRET",
+        "format": "FLAG{%s}"
+      },
+      "dev": "FLAG{dev-vulnerable-ad}",
+      "hints": [
+        "Start anonymously: enumerate users and their attributes over LDAP and SMB.",
+        "User attributes and shared passwords give a first account; Kerberos then offers more.",
+        "Map the ACLs and group memberships (BloodHound) and look for replication rights or a privileged group that loads code into a service."
+      ],
+      "steps": [
+        {
+          "key": "domain",
+          "title": "Name the domain",
+          "prompt": "What is the DNS name of the Active Directory domain?",
+          "check": {
+            "answer": [
+              "cs.org"
+            ]
+          }
+        },
+        {
+          "key": "descriptions",
+          "title": "Leaky attribute",
+          "prompt": "Which user attribute in this lab sometimes holds a password in clear text?",
+          "check": {
+            "answer": [
+              "description",
+              "descriptions"
+            ]
+          }
+        },
+        {
+          "key": "roast",
+          "title": "Roast a service",
+          "prompt": "Which attack requests Kerberos service tickets for accounts that have an SPN, then cracks them offline?",
+          "check": {
+            "answer": [
+              "kerberoasting",
+              "kerberoast"
+            ]
+          }
+        },
+        {
+          "key": "asrep",
+          "title": "No pre-authentication",
+          "prompt": "Which attack collects crackable material for accounts that have Kerberos pre-authentication disabled?",
+          "check": {
+            "answer": [
+              "as-rep roasting",
+              "asrep roasting",
+              "asreproasting",
+              "as-rep roast",
+              "asrep roast",
+              "asreproast"
+            ]
+          }
+        },
+        {
+          "key": "dnsadmins",
+          "title": "Abuse a group",
+          "prompt": "Membership of which built-in group lets a user make the DNS service load a DLL of their choice?",
+          "check": {
+            "answer": [
+              "dnsadmins"
+            ]
+          }
+        },
+        {
+          "key": "dcsync",
+          "title": "Replicate the secrets",
+          "prompt": "Which technique uses directory replication rights to pull every account's password hash from the domain controller?",
+          "check": {
+            "answer": [
+              "dcsync",
+              "dc sync"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
